@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.IO.TankDriveIOSpark;
 import frc.robot.Subsystems.TankDrive;
 import yams.motorcontrollers.SmartMotorControllerConfig;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class RobotContainer {
 
@@ -29,15 +31,21 @@ public class RobotContainer {
 
   public RobotContainer() {
 
+    driverCtrl = new CommandXboxController(0);
+
     tankDriveConfig = new SmartMotorControllerConfig(tankDrive)
-        .withGearing(0)
+        .withTelemetry(TelemetryVerbosity.HIGH)
+        .withStatorCurrentLimit(Constants.maxDriveCurrent)
+        .withGearing(Constants.driveRatio)
         .withClosedLoopController(Constants.tankDrivePID)
         .withFeedforward(Constants.tankDriveFF)
+        .withSimClosedLoopController(Constants.tankDrivePID)
+        .withSimFeedforward(Constants.tankDriveFF)
         .withGearing(Constants.driveRatio)
         .withMechanismCircumference(Constants.trackWidth)
         .withStartingPosition(Meter.zero());
 
-    tankDriveIO = new TankDriveIOSpark(0, 1, 2, 3,
+    tankDriveIO = new TankDriveIOSpark(0, 1, 2, 3, DCMotor.getNEO(1),
         tankDriveConfig,
         tankDriveConfig.withMotorInverted(true));
 

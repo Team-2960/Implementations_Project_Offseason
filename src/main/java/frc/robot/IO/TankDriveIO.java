@@ -7,6 +7,8 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.units.VoltageUnit;
@@ -19,6 +21,8 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 
 public interface TankDriveIO {
 
@@ -52,11 +56,17 @@ public interface TankDriveIO {
     public default void setLinPos(Distance leftDist, Distance rightDist) {
     }
 
-    public default void setAngPos(Distance leftAng, Distance rightAng) {
-    }
+    public default void setAngPos(Angle leftAng, Angle rightAng) {}
 
-    public default SysIdRoutine getSysId(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration) {
-        return null;
-    }
+    public default void getVoltageCmd(Supplier<Voltage> leftVolts, Supplier<Voltage> rightVolts) {}
+
+    public default void getLinRateCmd(Supplier<LinearVelocity> leftRate, Supplier<LinearVelocity> rightRate) {}
+
+    public default void getAngRateCmd(Supplier<AngularVelocity> leftRate, Supplier<AngularVelocity> rightRate) {}
+
+    public default void getLinPosCmd(Supplier<Distance> leftDist, Supplier<Distance> rightDist) {}
+
+    public default void getAngPosCmd(Supplier<Distance> leftAng, Supplier<Distance> rightAng) {}
+    
 
 }

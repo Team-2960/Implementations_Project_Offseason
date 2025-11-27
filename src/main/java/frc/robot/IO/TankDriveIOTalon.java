@@ -1,34 +1,29 @@
 package frc.robot.IO;
 
 import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.function.Supplier;
-
-import com.revrobotics.REVLibError;
-import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.local.SparkWrapper;
 
-public class TankDriveIOSpark implements TankDriveIO {
-
-    private SparkMax lfMotor;
-    private SparkMax lbMotor;
-    private SparkMax rfMotor;
-    private SparkMax rbMotor;
+public class TankDriveIOTalon implements TankDriveIO{
+    
+    private TalonFX lfMotor;
+    private TalonFX lbMotor;
+    private TalonFX rfMotor;
+    private TalonFX rbMotor;
 
     private SmartMotorController leftMotor;
     private SmartMotorController rightMotor;
@@ -46,12 +41,13 @@ public class TankDriveIOSpark implements TankDriveIO {
      * @param leftConfig  left motor configuration
      * @param rightConfig right motor configuration
      */
-    public TankDriveIOSpark(int lfMotorID, int lbMotorID, int rfMotorID, int rbMotorID, DCMotor motorType,
+    public TankDriveIOTalon(int lfMotorID, int lbMotorID, int rfMotorID, int rbMotorID,
             SmartMotorControllerConfig leftConfig, SmartMotorControllerConfig rightConfig) {
-        lfMotor = new SparkMax(lfMotorID, MotorType.kBrushless);
-        lbMotor = new SparkMax(lbMotorID, MotorType.kBrushless);
-        rfMotor = new SparkMax(rfMotorID, MotorType.kBrushless);
-        rbMotor = new SparkMax(rbMotorID, MotorType.kBrushless);
+        
+        lfMotor = new TalonFX(lfMotorID);
+        lbMotor = new TalonFX(lbMotorID);
+        rfMotor = new TalonFX(rfMotorID);
+        rbMotor = new TalonFX(rbMotorID);
 
         // lfMotor.configure(leftConfig, ResetMode.kNoResetSafeParameters,
         // PersistMode.kPersistParameters);
@@ -65,16 +61,14 @@ public class TankDriveIOSpark implements TankDriveIO {
         // PersistMode.kPersistParameters);
         // rbMotor.configure(rightConfig, ResetMode.kNoResetSafeParameters,
         // PersistMode.kPersistParameters);
-        
+
         leftConfig.withFollowers(Pair.of(lbMotor, false));
+        leftMotor.applyConfig(leftConfig);
 
         rightConfig.withFollowers(Pair.of(rbMotor, false));
+        rightMotor.applyConfig(rightConfig);
 
-        leftMotor = new SparkWrapper(lfMotor, motorType, leftConfig);
-
-        rightMotor = new SparkWrapper(rfMotor, motorType, rightConfig);
-
-
+        getSysId(Volts.of(12), Volts.of(2).per(Second), null);
     }
 
     @Override
@@ -111,4 +105,9 @@ public class TankDriveIOSpark implements TankDriveIO {
         inputs.rightDistance = rightMotor.getMeasurementPosition();
         inputs.rightAngle = rightMotor.getMechanismPosition();
     }
+
+    public SysIdRoutine getSysId(Voltage maxVoltage, Velocity<VoltageUnit> stepVoltage, Time testDuration) {
+        return leftMotor.sysId(maxVoltage, stepVoltage, testDuration);
+    }
+
 }
